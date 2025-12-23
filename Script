@@ -1,0 +1,323 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Ftap Hubs",
+   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "Ftap hubs Loading",
+   LoadingSubtitle = "by Noxi",
+   ShowText = "Fling things and people", -- for mobile users to unhide rayfield, change if you'd like
+   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+   ToggleUIKeybind = "Q", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "FtapHubs"
+   },
+
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = true, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Key System",
+      Subtitle = "Key System",
+      Note = "Dm in discord alisurosh for the key", -- Use this to tell the user how to get a key
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"f1p8yT2aZA"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local Tab = Window:CreateTab("Main🔥", "rewind")
+
+local Button = Tab:CreateButton({
+   Name = "Load Blitz",
+   Callback = function()
+      loadstring(game:HttpGet("https://raw.githubusercontent.com/BlizTBr/scripts/refs/heads/main/FTAP.lua"))()
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Load Blood v2",
+   Callback = function()
+      --[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+loadstring(game:HttpGet("https://raw.githubusercontent.com/BloodyV2/BloodyScript/refs/heads/main/Free",true))()
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Load Infinite Yield",
+   Callback = function()
+      loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Load Verbal hub v3",
+   Callback = function()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/VerbalHubz/Verbal-Hub/refs/heads/main/Verbal%20Hub%20V3", true))
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Load Noxi Hub A.k.a My hub Key:Free_239832347xkxn3289",
+   Callback = function()
+      -- ==============================
+-- SERVICES / BASE VARS
+-- ==============================
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local plr = Players.LocalPlayer
+local cam = Workspace.CurrentCamera
+
+-- ==============================
+-- MAIN TOGGLES / VALUES
+-- ==============================
+local infLineExtendT = false
+local antiGrabT = false
+local antiGrabAnchorT = true
+local increaseLineExtendV = 1
+local lineDistanceV = 11
+
+local aimLock = false
+local currentTarget = nil
+local MAX_DISTANCE = 1500
+local SMOOTHNESS = 0.2
+local TOGGLE_KEY = Enum.KeyCode.F
+
+-- ==============================
+-- GUI SETUP
+-- ==============================
+local MainWindow = Rayfield:CreateWindow({
+    Name = "MainWindow",
+    LoadingTitle = "Rayfield Interface Suite",
+    LoadingSubtitle = "by Noxi",
+    ShowText = "Rayfield",
+    Theme = "Default",
+    ToggleUIKeybind = "K",
+    ConfigurationSaving = {Enabled = true, FileName = "Noxi_Ftap"},
+    KeySystem = true,
+    KeySettings = {
+        Title = "Noxi's Keysystem",
+        FileName = "Key",
+        SaveKey = true,
+        GrabKeyFromSite = true,
+        Key = {"Free_239832347xkxn3289"}
+    }
+})
+
+-- ==============================
+-- MAIN TAB
+-- ==============================
+local MainTab = MainWindow:CreateTab("Main", 4483362458)
+
+-- Infinite Line Extend Toggle
+local ExtendLineToggle = MainTab:CreateToggle({
+    Name = "Infinite Line Extend",
+    CurrentValue = infLineExtendT,
+    Flag = "LineExtendToggle",
+    Callback = function(value)
+        infLineExtendT = value
+    end
+})
+
+-- Line Distance Input (no limit)
+local LineDistanceInput = MainTab:CreateInput({
+    Name = "Line Distance Increment",
+    CurrentValue = tostring(increaseLineExtendV),
+    PlaceholderText = "Enter any number",
+    RemoveTextAfterFocusLost = false,
+    Flag = "LineDistanceInput",
+    Callback = function(text)
+        local val = tonumber(text)
+        if val then
+            increaseLineExtendV = val
+        else
+            LineDistanceInput:SetText(tostring(increaseLineExtendV))
+        end
+    end
+})
+
+-- Anti Grab Toggle
+local AntiGrabToggle = MainTab:CreateToggle({
+    Name = "Anti Grab",
+    CurrentValue = antiGrabT,
+    Flag = "AntiGrabToggle",
+    Callback = function(value)
+        antiGrabT = value
+        if value then
+            task.spawn(function()
+                local char = plr.Character or plr.CharacterAdded:Wait()
+                local hrp = char:WaitForChild("HumanoidRootPart")
+                while antiGrabT do
+                    if plr:FindFirstChild("IsHeld") and plr.IsHeld.Value then
+                        if antiGrabAnchorT then
+                            hrp.Anchored = true
+                            while plr.IsHeld.Value do
+                                ReplicatedStorage.CharacterEvents.Struggle:FireServer(plr)
+                                task.wait(0.01)
+                            end
+                            hrp.Anchored = false
+                        else
+                            while plr.IsHeld.Value do
+                                ReplicatedStorage.CharacterEvents.Struggle:FireServer(plr)
+                                task.wait(0.01)
+                            end
+                        end
+                    end
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end
+})
+
+-- Mouse Wheel Line Extend
+UserInputService.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseWheel and infLineExtendT then
+        if lineDistanceV < 11 then lineDistanceV = 11 end
+        if input.Position.Z > 0 then
+            lineDistanceV = lineDistanceV + increaseLineExtendV
+        elseif input.Position.Z < 0 then
+            lineDistanceV = lineDistanceV - increaseLineExtendV
+        end
+    end
+end)
+
+-- Grab Parts Extender
+Workspace.ChildAdded:Connect(function(child)
+    if child.Name == "GrabParts" and child:IsA("Model") then
+        if infLineExtendT and UserInputService.MouseEnabled then
+            child:WaitForChild("GrabPart")
+            child:WaitForChild("DragPart")
+            local clonedDragPart = child.DragPart:Clone()
+            clonedDragPart.Name = "DragPart1"
+            clonedDragPart.AlignPosition.Attachment1 = clonedDragPart.DragAttach
+            clonedDragPart.Parent = child
+            lineDistanceV = (clonedDragPart.Position - cam.CFrame.Position).Magnitude
+            clonedDragPart.AlignOrientation.Enabled = false
+            child.DragPart.AlignPosition.Enabled = false
+            task.spawn(function()
+                while child.Parent do
+                    clonedDragPart.Position = cam.CFrame.Position + cam.CFrame.LookVector * lineDistanceV
+                    task.wait()
+                end
+                lineDistanceV = 0
+            end)
+        end
+    end
+end)
+
+-- ==============================
+-- AIM LOCK
+-- ==============================
+local Mouse = plr:GetMouse()
+local function getClosestPlayerToMouse()
+    local closestPlayer = nil
+    local shortestDistance = MAX_DISTANCE
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= plr and player.Character then
+            local head = player.Character:FindFirstChild("Head")
+            local hum = player.Character:FindFirstChild("Humanoid")
+            if head and hum and hum.Health > 0 then
+                local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
+                if onScreen then
+                    local distance = (Vector2.new(Mouse.X, Mouse.Y) - Vector2.new(screenPos.X, screenPos.Y)).Magnitude
+                    if distance < shortestDistance then
+                        shortestDistance = distance
+                        closestPlayer = player
+                    end
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == TOGGLE_KEY then
+        aimLock = not aimLock
+        if aimLock then
+            currentTarget = getClosestPlayerToMouse()
+        else
+            currentTarget = nil
+        end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if aimLock and currentTarget and currentTarget.Character then
+        local head = currentTarget.Character:FindFirstChild("Head")
+        local hum = currentTarget.Character:FindFirstChild("Humanoid")
+        if head and hum and hum.Health > 0 then
+            cam.CFrame = cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, head.Position), SMOOTHNESS)
+        else
+            currentTarget = nil
+        end
+    end
+end)
+
+-- ==============================
+-- MISC TAB
+-- ==============================
+local MiscTab = MainWindow:CreateTab("Misc", 4483362458)
+
+-- Infinite Yield Button
+MiscTab:CreateButton({
+    Name = "Load Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
+    end
+})
+
+-- Camera FOV Input
+local CamFOVInput = MiscTab:CreateInput({
+    Name = "Camera FOV",
+    CurrentValue = tostring(cam.FieldOfView),
+    PlaceholderText = "Enter FOV value",
+    RemoveTextAfterFocusLost = false,
+    Flag = "CameraFOVInput",
+    Callback = function(text)
+        local val = tonumber(text)
+        if val then
+            cam.FieldOfView = val
+        else
+            CamFOVInput:SetText(tostring(cam.FieldOfView))
+        end
+    end
+})
+
+   end,
+})
+
+
+local Button = Tab:CreateButton({
+   Name = "Nosral smthin like that hub",
+   Callback = function()
+       loadstring(game:HttpGet('https://raw.githubusercontent.com/Brovaky/Friendly/refs/heads/main/Friendly'))()
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Ftap All hub from some random creator",
+   Callback = function()
+       loadstring(game:HttpGet('https://raw.githubusercontent.com/Brovaky/Friendly/refs/heads/main/Friendly'))()
+   end,
+})
